@@ -5,12 +5,24 @@ import ProductItem from "./ProductItem";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { getProductAsync } from "../redux/productSlice";
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
 import { useGetProductsQuery } from "../redux/api";
+import { useAppContext } from "../App";
 
 function ListProduct({ ...props }) {
-  const state = useSelector((state) => state.product);
-  const { data: products, isLoading } = useGetProductsQuery();
+  const { state, dispatch } = useAppContext();
+  const { products } = state;
+
+  useEffect(() => {
+    async function getProduct() {
+      const url = "http://localhost:3004/products";
+      const res = await fetch(url);
+      const data = await res.json();
+      dispatch({ type: "SET_PRODUCT", payload: data });
+    }
+
+    getProduct();
+  }, []);
 
   return (
     <Box sx={{ flexGrow: 1 }}>

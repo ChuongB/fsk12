@@ -1,18 +1,51 @@
 import "./App.css";
 import ListProduct from "./components/ProductList";
-// import useAxios from "axios-hooks";
-// import Counter from "./components/Counter";
+import React from "react";
+import { useContext, createContext, useReducer } from "react";
 
-const url = "http://localhost:3004/products";
+const initialState = {
+  count: 10,
+  products: [],
+};
+export const AppContext = createContext();
+const countReducer = (state, action) => {
+  const { type, payload } = action;
+  switch (type) {
+    case "SET_PRODUCT": {
+      return {
+        ...state,
+        products: payload,
+      };
+    }
+    case "INCREMENT": {
+      return {
+        ...state,
+        count: state.count,
+      };
+    }
+    case "DECREMENT": {
+      return {
+        ...state,
+        count: state.count,
+      };
+    }
+    default:
+      return state;
+  }
+};
 
 function App() {
-  // const [{ data, loading, error }, refetch] = useAxios(url);
+  const [state, dispatch] = useReducer(countReducer, initialState);
 
-  // console.log(data, loading);
+  const value = { state, dispatch };
 
-  // return <ListProduct products={data || []} id={'test'} />;
-
-  return <ListProduct />;
+  return (
+    <AppContext.Provider value={value}>
+      <ListProduct />
+    </AppContext.Provider>
+  );
 }
+
+export const useAppContext = () => useContext(AppContext);
 
 export default App;
