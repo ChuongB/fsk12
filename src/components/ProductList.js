@@ -1,12 +1,9 @@
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import * as React from "react";
-import ProductItem from "./ProductItem";
 import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import { getProductAsync } from "../redux/productSlice";
-import { useEffect } from "react";
 import { useGetProductsQuery } from "../redux/api";
+import ProductItem from "./ProductItem";
 
 function ListProduct({ ...props }) {
   const state = useSelector((state) => state.product);

@@ -1,18 +1,19 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import ListProduct from "./components/ProductList";
-// import useAxios from "axios-hooks";
-// import Counter from "./components/Counter";
-
-const url = "http://localhost:3004/products";
-
+import PrimarySearchAppBar from "./components/AppBar";
+import ProductPage from "./pages/ProductPage";
+import "./index.css";
+import CartPage from "./pages/CartPage";
 function App() {
-  // const [{ data, loading, error }, refetch] = useAxios(url);
-
-  // console.log(data, loading);
-
-  // return <ListProduct products={data || []} id={'test'} />;
-
-  return <ListProduct />;
+  return (
+    <BrowserRouter>
+      <PrimarySearchAppBar />
+      <Routes>
+        <Route path="/products" element={<ProductPage />}></Route>
+        <Route path="/cart" element={<CartPage />}></Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;
