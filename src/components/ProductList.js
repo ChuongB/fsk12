@@ -12,18 +12,19 @@ function ListProduct({ ...props }) {
   const state = useSelector((state) => state.product);
   const { data: products, isLoading } = useGetProductsQuery();
 
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Grid container spacing={2}>
-        {products &&
-          products.map((item) => (
-            <Grid item xs={3} key={item.id}>
-              <ProductItem product={item} />
-            </Grid>
-          ))}
-      </Grid>
-    </Box>
-  );
+  return <h1>Product list</h1>;
+  // return (
+  //   <Box sx={{ flexGrow: 1 }}>
+  //     <Grid container spacing={2}>
+  //       {products &&
+  //         products.map((item) => (
+  //           <Grid item xs={3} key={item.id}>
+  //             <ProductItem product={item} />
+  //           </Grid>
+  //         ))}
+  //     </Grid>
+  //   </Box>
+  // );
 }
 
 export default ListProduct;
