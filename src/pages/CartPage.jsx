@@ -18,6 +18,20 @@ const CartPage = () => {
   const decrease = (product) => {
     dispatch(decreaseItem(product));
   };
+
+  function getTotal() {
+    // let total = 0;
+    // cart.forEach((product) => {
+    //   total += product.quantity * product.price;
+    // });
+
+    const total = cart.reduce(
+      (sum, product) => sum + product.quantity * product.price,
+      0
+    );
+
+    return total;
+  }
   return (
     <Card sx={{ minWidth: 275, maxWidth: 600, m: "50px auto", p: 3 }}>
       <CardContent>
@@ -63,6 +77,9 @@ const CartPage = () => {
             );
           })}
         </List>
+        <div style={{ textAlign: "end" }}>
+          <span>Total: {getTotal()}</span>
+        </div>
       </CardContent>
     </Card>
   );

@@ -4,6 +4,9 @@ import PrimarySearchAppBar from "./components/AppBar";
 import ProductPage from "./pages/ProductPage";
 import "./index.css";
 import CartPage from "./pages/CartPage";
+import LoginPage from "./pages/LoginPage";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 function App() {
   return (
     <BrowserRouter>
@@ -11,7 +14,9 @@ function App() {
       <Routes>
         <Route path="/products" element={<ProductPage />}></Route>
         <Route path="/cart" element={<CartPage />}></Route>
+        <Route path="/login" element={<LoginPage />}></Route>
       </Routes>
+      <ToastContainer />
     </BrowserRouter>
   );
 }

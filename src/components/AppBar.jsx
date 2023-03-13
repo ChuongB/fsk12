@@ -17,7 +17,9 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
+import { logout } from "../redux/productSlice";
+import { toast } from "react-toastify";
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -59,7 +61,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function PrimarySearchAppBar() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const state = useSelector((state) => state.product);
+  const { isLoggedIn } = state;
 
   const getTotalItem = state.cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -80,6 +85,17 @@ export default function PrimarySearchAppBar() {
   const handleMenuClose = () => {
     setAnchorEl(null);
     handleMobileMenuClose();
+  };
+
+  const handleLogin = () => {
+    handleMenuClose();
+    navigate("/login");
+  };
+
+  const handleLogout = () => {
+    handleMenuClose();
+    dispatch(logout());
+    toast("Logout successful");
   };
 
   const handleMobileMenuOpen = (event) => {
@@ -103,6 +119,12 @@ export default function PrimarySearchAppBar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
+      {isLoggedIn ? (
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+      ) : (
+        <MenuItem onClick={handleLogin}>Login</MenuItem>
+      )}
+
       <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
       <MenuItem onClick={handleMenuClose}>My account</MenuItem>
     </Menu>
