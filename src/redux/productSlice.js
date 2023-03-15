@@ -10,14 +10,20 @@ const initialState = {
   isLoggedIn: false,
 };
 
+const waiting = (timer) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve();
+    }, timer);
+  });
+};
 // asynchronous function with createAsyncThunk
 export const getProductAsync = createAsyncThunk(
   "product/fetchProducts",
   async (amount, { rejectWithValue }) => {
     try {
       const url = "http://localhost:3004/products";
-      const res = await fetch(url);
-      const data = await res.json();
+      const data = await fetch(url).then((res) => res.json());
       return data;
     } catch (err) {
       return rejectWithValue(err);
@@ -30,6 +36,7 @@ export const loginAsync = createAsyncThunk(
   "user/login",
   async (payload, { rejectWithValue }) => {
     try {
+      await waiting(1000);
       const url = "http://localhost:3004/users";
       const res = await fetch(url);
       const users = await res.json();
@@ -43,6 +50,33 @@ export const loginAsync = createAsyncThunk(
       return rejectWithValue("not find user");
     } catch (err) {
       return rejectWithValue("not find user");
+    }
+  }
+);
+
+export const signupAsync = createAsyncThunk(
+  "user/signup",
+  async (payload, { rejectWithValue }) => {
+    try {
+      await waiting(1000);
+      const url = "http://localhost:3004/users";
+      const res = await fetch(`${url}?email=${payload.email}`).then((res) =>
+        res.json()
+      );
+
+      if (res && res.length > 0) {
+        return rejectWithValue("this email already exists");
+      }
+
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      };
+      const data = await fetch(url, requestOptions).then((res) => res.json());
+      return data;
+    } catch (err) {
+      return rejectWithValue("create user failed");
     }
   }
 );
@@ -105,16 +139,31 @@ export const productSlice = createSlice({
         console.log(action.payload);
         // state.products = [];
       })
+      .addCase(loginAsync.pending, (state, action) => {
+        state.loading = true;
+      })
       .addCase(loginAsync.fulfilled, (state, action) => {
         toast("Login successful");
         state.isLoggedIn = true;
+        state.loading = false;
       })
       .addCase(loginAsync.rejected, (state, action) => {
         toast.error("Login failed");
         state.isLoggedIn = false;
+        state.loading = false;
+      })
+      .addCase(signupAsync.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(signupAsync.fulfilled, (state, action) => {
+        toast("Create account successful");
+        state.loading = false;
+      })
+      .addCase(signupAsync.rejected, (state, action) => {
+        toast.error(action.payload);
+        state.loading = false;
       })
       .addMatcher(api.endpoints.getProducts.matchFulfilled, (state, action) => {
-        // Lưu thông tin user vào state
         state.products = action.payload;
       });
   },

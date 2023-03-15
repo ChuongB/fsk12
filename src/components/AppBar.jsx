@@ -63,16 +63,14 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 export default function PrimarySearchAppBar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const state = useSelector((state) => state.product);
-  const { isLoggedIn } = state;
+  const { isLoggedIn, cart } = useSelector((state) => state.product);
 
-  const getTotalItem = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+  const getTotalItem = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
 
   const isMenuOpen = Boolean(anchorEl);
-  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -96,6 +94,11 @@ export default function PrimarySearchAppBar() {
     handleMenuClose();
     dispatch(logout());
     toast("Logout successful");
+  };
+
+  const handleOpenProfile = () => {
+    handleMenuClose();
+    navigate("/profile");
   };
 
   const handleMobileMenuOpen = (event) => {
@@ -125,60 +128,9 @@ export default function PrimarySearchAppBar() {
         <MenuItem onClick={handleLogin}>Login</MenuItem>
       )}
 
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-    </Menu>
-  );
+      {isLoggedIn && <MenuItem onClick={handleOpenProfile}>Profile</MenuItem>}
 
-  const mobileMenuId = "primary-search-account-menu-mobile";
-  const renderMobileMenu = (
-    <Menu
-      anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={mobileMenuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMobileMenuOpen}
-      onClose={handleMobileMenuClose}
-    >
-      <MenuItem>
-        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={0} color="error">
-            <MailIcon />
-          </Badge>
-        </IconButton>
-        <p>Messages</p>
-      </MenuItem>
-      <MenuItem>
-        <IconButton
-          size="large"
-          aria-label="show 17 new notifications"
-          color="inherit"
-        >
-          <Badge badgeContent={state.cart.length} color="error">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-        <p>Notifications</p>
-      </MenuItem>
-      <MenuItem onClick={handleProfileMenuOpen}>
-        <IconButton
-          size="large"
-          aria-label="account of current user"
-          aria-controls="primary-search-account-menu"
-          aria-haspopup="true"
-          color="inherit"
-        >
-          <AccountCircle />
-        </IconButton>
-        <p>Profile</p>
-      </MenuItem>
+      {isLoggedIn && <MenuItem onClick={handleMenuClose}>My account</MenuItem>}
     </Menu>
   );
 
@@ -268,7 +220,6 @@ export default function PrimarySearchAppBar() {
             <IconButton
               size="large"
               aria-label="show more"
-              aria-controls={mobileMenuId}
               aria-haspopup="true"
               onClick={handleMobileMenuOpen}
               color="inherit"
@@ -278,7 +229,6 @@ export default function PrimarySearchAppBar() {
           </Box>
         </Toolbar>
       </AppBar>
-      {renderMobileMenu}
       {renderMenu}
     </Box>
   );

@@ -7,13 +7,12 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { loginAsync } from "../redux/productSlice";
+import { signupAsync } from "../redux/productSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
-import { Link } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 const validationSchema = yup.object({
   email: yup
@@ -24,22 +23,32 @@ const validationSchema = yup.object({
     .string("Enter your password")
     .min(4, "Password should be of minimum 8 characters length")
     .required("Password is required"),
+  fullName: yup
+    .string("Enter your full name")
+    .required("Full name is required"),
+  birthday: yup.string("Enter your birthday"),
+  rePassword: yup
+    .string()
+    .oneOf([yup.ref("password"), null], "Passwords must match"),
 });
 
-const LoginPage = () => {
+const SignupPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { isLoggedIn, loading } = useSelector((state) => state.product);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const notify = () => toast("Login successful");
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      dispatch(loginAsync(values));
+    onSubmit: async (values) => {
+      const res = await dispatch(signupAsync(values));
+
+      if (res.meta.requestStatus === "fulfilled") {
+        navigate("/login");
+      }
     },
   });
 
@@ -91,6 +100,58 @@ const LoginPage = () => {
               }}
             />
 
+            <TextField
+              fullWidth
+              id="rePassword"
+              name="rePassword"
+              label="Confirm Password"
+              type={showPassword ? "text" : "password"}
+              value={formik.values.rePassword}
+              onChange={formik.handleChange}
+              error={
+                formik.touched.rePassword && Boolean(formik.errors.rePassword)
+              }
+              helperText={formik.touched.rePassword && formik.errors.rePassword}
+              sx={{ mb: 3 }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              fullWidth
+              id="fullName"
+              name="fullName"
+              label="Full name"
+              value={formik.values.fullName}
+              onChange={formik.handleChange}
+              error={formik.touched.fullName && Boolean(formik.errors.fullName)}
+              helperText={formik.touched.fullName && formik.errors.fullName}
+              sx={{ mb: 3 }}
+            />
+
+            <TextField
+              fullWidth
+              id="birthday"
+              name="birthday"
+              label="birthday"
+              value={formik.values.birthday}
+              onChange={formik.handleChange}
+              error={formik.touched.birthday && Boolean(formik.errors.birthday)}
+              helperText={formik.touched.birthday && formik.errors.birthday}
+              sx={{ mb: 3 }}
+            />
+
             <Button color="primary" variant="contained" fullWidth type="submit">
               {loading && (
                 <CircularProgress
@@ -100,26 +161,13 @@ const LoginPage = () => {
                   }}
                 />
               )}
-              Submit
+              Sign up
             </Button>
           </form>
-          <small style={{ paddingTop: "15px", display: "inline-block" }}>
-            Don't have account?
-            <Link
-              to="/signup"
-              style={{
-                color: "blue",
-                textDecoration: "none",
-                marginLeft: "10px",
-              }}
-            >
-              Sign up now!
-            </Link>
-          </small>
         </div>
       </CardContent>
     </Card>
   );
 };
 
-export default LoginPage;
+export default SignupPage;
