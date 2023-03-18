@@ -2,12 +2,15 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { api } from "./api";
 import { toast } from "react-toastify";
-// import { fetchCount } from "./counterAPI";
+
+const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 const initialState = {
   products: [],
   loading: false,
   cart: [],
   isLoggedIn: false,
+  currentUser: null,
 };
 
 const waiting = (timer) => {
@@ -22,8 +25,27 @@ export const getProductAsync = createAsyncThunk(
   "product/fetchProducts",
   async (amount, { rejectWithValue }) => {
     try {
-      const url = "http://localhost:3004/products";
+      const url = `${BASE_URL}/products`;
       const data = await fetch(url).then((res) => res.json());
+      return data;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  }
+);
+
+
+export const deleteProductAsync = createAsyncThunk(
+  "product/deleteProducts",
+  async (product, { rejectWithValue }) => {
+    try {
+      const url = `${BASE_URL}/products/${product.id}`;
+
+      const requestOptions = {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      };
+      const data = await fetch(url, requestOptions).then((res) => res.json());
       return data;
     } catch (err) {
       return rejectWithValue(err);
@@ -37,7 +59,7 @@ export const loginAsync = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       await waiting(1000);
-      const url = "http://localhost:3004/users";
+      const url = `${BASE_URL}/users`;
       const res = await fetch(url);
       const users = await res.json();
       const find = users.find((user) => user.email === payload.email);
@@ -59,7 +81,7 @@ export const signupAsync = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       await waiting(1000);
-      const url = "http://localhost:3004/users";
+      const url = `${BASE_URL}/users`;
       const res = await fetch(`${url}?email=${payload.email}`).then((res) =>
         res.json()
       );
@@ -146,6 +168,7 @@ export const productSlice = createSlice({
         toast("Login successful");
         state.isLoggedIn = true;
         state.loading = false;
+        state.currentUser = action.payload
       })
       .addCase(loginAsync.rejected, (state, action) => {
         toast.error("Login failed");

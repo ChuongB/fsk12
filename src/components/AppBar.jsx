@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../redux/productSlice";
 import { toast } from "react-toastify";
+import ProductManagement from "./../pages/admin/ProductManagementPage";
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -101,6 +102,11 @@ export default function PrimarySearchAppBar() {
     navigate("/profile");
   };
 
+  const handleProductManagement = () => {
+    handleMenuClose();
+    navigate("/admin/products");
+  };
+
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
@@ -129,6 +135,12 @@ export default function PrimarySearchAppBar() {
       )}
 
       {isLoggedIn && <MenuItem onClick={handleOpenProfile}>Profile</MenuItem>}
+
+      {isLoggedIn && (
+        <MenuItem onClick={handleProductManagement}>
+          Product Management
+        </MenuItem>
+      )}
 
       {isLoggedIn && <MenuItem onClick={handleMenuClose}>My account</MenuItem>}
     </Menu>
