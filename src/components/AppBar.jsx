@@ -18,7 +18,7 @@ import MoreIcon from "@mui/icons-material/MoreVert";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../redux/productSlice";
+import { logout , searchProducts } from "../redux/productSlice";
 import { toast } from "react-toastify";
 import ProductManagement from "./../pages/admin/ProductManagementPage";
 const Search = styled("div")(({ theme }) => ({
@@ -111,6 +111,10 @@ export default function PrimarySearchAppBar() {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
+  const handleSearchProducts = (event) => {
+    const keyword = event.target.value;
+    dispatch(searchProducts(keyword));
+  };
   const menuId = "primary-search-account-menu";
   const renderMenu = (
     <Menu
@@ -174,6 +178,7 @@ export default function PrimarySearchAppBar() {
             <StyledInputBase
               placeholder="Search…"
               inputProps={{ "aria-label": "search" }}
+              onChange={(e) => handleSearchProducts(e)}
             />
           </Search>
           <Box sx={{ flexGrow: 1 }} />

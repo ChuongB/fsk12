@@ -7,10 +7,12 @@ const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 const initialState = {
   products: [],
+  searchedProducts: [],
   loading: false,
   cart: [],
   isLoggedIn: false,
   currentUser: null,
+  draftProduct: null,
 };
 
 const waiting = (timer) => {
@@ -34,6 +36,43 @@ export const getProductAsync = createAsyncThunk(
   }
 );
 
+export const addProductAsync = createAsyncThunk(
+  "product/addProducts",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const url = `${BASE_URL}/products`;
+
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      };
+      const data = await fetch(url, requestOptions).then((res) => res.json());
+      return data;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  }
+);
+
+export const editProductAsync = createAsyncThunk(
+  "product/editProducts",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const url = `${BASE_URL}/products/${payload.id}`;
+
+      const requestOptions = {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      };
+      const data = await fetch(url, requestOptions).then((res) => res.json());
+      return data;
+    } catch (err) {
+      return rejectWithValue(err);
+    }
+  }
+);
 
 export const deleteProductAsync = createAsyncThunk(
   "product/deleteProducts",
@@ -136,13 +175,22 @@ export const productSlice = createSlice({
       const find = state.cart.find((item) => item.id === product.id);
       if (find && find.quantity > 1) {
         find.quantity -= 1;
-      }
-      if (find && find.quantity === 1) {
+      } else if (find && find.quantity === 1) {
         state.cart = state.cart.filter((item) => item.id !== product.id);
       }
     },
     logout: (state, action) => {
       state.isLoggedIn = false;
+    },
+    saveDraft: (state, action) => {
+      state.draftProduct = action.payload;
+    },
+    searchProducts: (state, action) => {
+      const finds = state.products.filter((item) =>
+        item.title.includes(action.payload)
+      );
+
+      state.searchedProducts = finds;
     },
   },
   // The `extraReducers` field lets the slice handle actions defined elsewhere,
@@ -155,11 +203,10 @@ export const productSlice = createSlice({
       .addCase(getProductAsync.fulfilled, (state, action) => {
         state.loading = false;
         state.products = action.payload;
+        state.searchedProducts = action.payload;
       })
       .addCase(getProductAsync.rejected, (state, action) => {
         state.loading = false;
-        console.log(action.payload);
-        // state.products = [];
       })
       .addCase(loginAsync.pending, (state, action) => {
         state.loading = true;
@@ -168,7 +215,7 @@ export const productSlice = createSlice({
         toast("Login successful");
         state.isLoggedIn = true;
         state.loading = false;
-        state.currentUser = action.payload
+        state.currentUser = action.payload;
       })
       .addCase(loginAsync.rejected, (state, action) => {
         toast.error("Login failed");
@@ -191,6 +238,12 @@ export const productSlice = createSlice({
       });
   },
 });
-export const { setProduct, addToCart, increaseItem, decreaseItem, logout } =
-  productSlice.actions;
+export const {
+  setProduct,
+  addToCart,
+  increaseItem,
+  decreaseItem,
+  logout,
+  searchProducts,
+} = productSlice.actions;
 export default productSlice.reducer;

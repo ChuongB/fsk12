@@ -1,80 +1,137 @@
-import * as React from "react";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
+import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import * as yup from "yup";
+import TextField from "@mui/material/TextField";
 import { useFormik } from "formik";
-import CircularProgress from "@mui/material/CircularProgress";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import * as yup from "yup";
+import {
+  addProductAsync,
+  getProductAsync,
+  editProductAsync,
+} from "../redux/productSlice";
 const validationSchema = yup.object({
-  name: yup.string("Enter your product name").required("Email is required"),
-
-  imageUrl: yup
+  title: yup
+    .string("Enter your product name")
+    .required("Product Name is required"),
+  imgUrl: yup
     .string("Enter your product imageUrl")
-    .required("image name is required"),
+    .required("image url is required"),
   description: yup.string("Enter product description"),
   price: yup
     .string("Enter your product price")
-    .required("price name is required"),
+    .required("product price  is required"),
 });
 
-export default function ProductFormDialog({ open, setOpen }) {
+export default function ProductFormDialog({ open, setOpen, isEdit, product }) {
   const { isLoggedIn, loading } = useSelector((state) => state.product);
+  const [imgUrl, setImgUrl] = useState(null);
+  const dispatch = useDispatch();
   const handleClickOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
+    resetForm();
     setOpen(false);
+  };
+
+  const resetForm = () => {
+    formik.resetForm();
+    setImgUrl(null);
   };
 
   const formik = useFormik({
     initialValues: {
-      email: "",
-      password: "",
+      title: "",
+      imgUrl: "",
+      description: "",
+      price: "",
+      contact: false
     },
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      //todo
+      if (isEdit) {
+        //TODO: dispatch action edit product
+        values.id = product.id;
+        dispatch(editProductAsync(values)).then((data) => {
+          handleClose();
+          resetForm();
+          dispatch(getProductAsync());
+        });
+      } else {
+        dispatch(addProductAsync(values)).then((data) => {
+          handleClose();
+          resetForm();
+          dispatch(getProductAsync());
+        });
+      }
     },
   });
 
-  const addProduct = () => {
-    console.log("add product", formik.values);
+  const handleSubmit = () => {
+    formik.submitForm();
   };
+
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
+  const handleUploadImage = (event) => {
+    toBase64(event.target.files[0]).then((data) => {
+      setImgUrl(data);
+      formik.setFieldValue("imgUrl", data);
+    });
+  };
+
+  useEffect(() => {
+    if (isEdit) {
+      const { title, imgUrl, description, price } = product;
+      formik.setFieldValue("title", title);
+      formik.setFieldValue("imgUrl", imgUrl);
+      formik.setFieldValue("description", description);
+      formik.setFieldValue("price", price);
+      setImgUrl(imgUrl);
+    }
+  }, [product]);
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Add product</DialogTitle>
+      <DialogTitle>{isEdit ? "Edit" : "Add"} product</DialogTitle>
       <DialogContent>
         <div style={{ textAlign: "center" }}>
           <form onSubmit={formik.handleSubmit}>
             <TextField
               fullWidth
-              id="name"
-              name="name"
-              label="name"
-              value={formik.values.name}
+              id="title"
+              name="title"
+              label="title"
+              value={formik.values.title}
               onChange={formik.handleChange}
-              error={formik.touched.name && Boolean(formik.errors.name)}
-              helperText={formik.touched.name && formik.errors.name}
+              error={formik.touched.title && Boolean(formik.errors.title)}
+              helperText={formik.touched.title && formik.errors.title}
               sx={{ mb: 3 }}
             />
 
             <TextField
               fullWidth
-              id="imageUrl"
-              name="imageUrl"
-              label="imageUrl"
-              value={formik.values.imageUrl}
+              id="imgUrl"
+              name="imgUrl"
+              label="imgUrl"
+              value={formik.values.imgUrl}
               onChange={formik.handleChange}
-              error={formik.touched.imageUrl && Boolean(formik.errors.imageUrl)}
-              helperText={formik.touched.imageUrl && formik.errors.imageUrl}
+              error={formik.touched.imgUrl && Boolean(formik.errors.imgUrl)}
+              helperText={formik.touched.imgUrl && formik.errors.imgUrl}
               sx={{ mb: 3 }}
+              disabled
             />
 
             <TextField
@@ -104,13 +161,31 @@ export default function ProductFormDialog({ open, setOpen }) {
               helperText={formik.touched.price && formik.errors.price}
               sx={{ mb: 3 }}
             />
+            <Button variant="contained" component="label">
+              Upload File
+              <input
+                type="file"
+                hidden
+                onChange={(e) => handleUploadImage(e)}
+              />
+            </Button>
+
+            <div>
+              {imgUrl && (
+                <img
+                  src={imgUrl}
+                  alt="product image"
+                  style={{ width: "350px", marginTop: "20px" }}
+                />
+              )}
+            </div>
           </form>
         </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
         <Button
-          onClick={() => addProduct()}
+          onClick={() => handleSubmit()}
           variant="contained"
           color="primary"
         >
@@ -122,7 +197,7 @@ export default function ProductFormDialog({ open, setOpen }) {
               }}
             />
           )}
-          Save
+          {isEdit ? "Edit" : "Add"}
         </Button>
       </DialogActions>
     </Dialog>

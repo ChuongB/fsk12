@@ -24,7 +24,7 @@ export default function ProductManagement() {
   const { products } = useSelector((state) => state.product);
   const dispatch = useDispatch();
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
-
+  const [isEdit, setIsEdit] = useState(false);
   const [openFormDialog, setOpenFormDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -38,13 +38,25 @@ export default function ProductManagement() {
       dispatch(getProductAsync());
     });
   };
+
+  const addProduct = () => {
+    setSelectedProduct(null);
+    setIsEdit(false);
+    setOpenFormDialog(true);
+  };
+
+  const editProduct = (product) => {
+    setSelectedProduct(product);
+    setIsEdit(true);
+    setOpenFormDialog(true);
+  };
   return (
     <Box sx={{ width: "80%", m: "auto", pt: "50px" }}>
       <div style={{ textAlign: "end", paddingBottom: "30px" }}>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => setOpenFormDialog(true)}
+          onClick={() => addProduct()}
         >
           Add Product
         </Button>
@@ -82,7 +94,11 @@ export default function ProductManagement() {
                 <TableCell align="left">{row.description}</TableCell>
                 <TableCell align="left">{row.price}</TableCell>
                 <TableCell align="left">
-                  <IconButton aria-label="delete" color="primary">
+                  <IconButton
+                    aria-label="delete"
+                    color="primary"
+                    onClick={() => editProduct(row)}
+                  >
                     <EditIcon />
                   </IconButton>
                   <IconButton
@@ -122,6 +138,8 @@ export default function ProductManagement() {
       <ProductFormDialog
         open={openFormDialog}
         setOpen={() => setOpenFormDialog()}
+        isEdit={isEdit}
+        product={selectedProduct}
       />
     </Box>
   );

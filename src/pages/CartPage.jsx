@@ -20,11 +20,6 @@ const CartPage = () => {
   };
 
   function getTotal() {
-    // let total = 0;
-    // cart.forEach((product) => {
-    //   total += product.quantity * product.price;
-    // });
-
     const total = cart.reduce(
       (sum, product) => sum + product.quantity * product.price,
       0
@@ -35,6 +30,7 @@ const CartPage = () => {
   return (
     <Card sx={{ minWidth: 275, maxWidth: 600, m: "50px auto", p: 3 }}>
       <CardContent>
+        {(!cart || cart.length === 0) && <span>Your cart is empty</span>}
         <List>
           {cart.map((product) => {
             return (
@@ -77,9 +73,11 @@ const CartPage = () => {
             );
           })}
         </List>
-        <div style={{ textAlign: "end" }}>
-          <span>Total: {getTotal()}</span>
-        </div>
+        {cart && cart.length > 0 && (
+          <div style={{ textAlign: "end" }}>
+            <span>Total: {getTotal()}</span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

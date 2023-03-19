@@ -6,7 +6,9 @@ import ProductItem from "./ProductItem";
 import ProductLoadingItem from "./ProductLoadingItem";
 import { getProductAsync } from "../redux/productSlice";
 function ListProduct({ ...props }) {
-  const { products, loading } = useSelector((state) => state.product);
+  const { searchedProducts: products, loading } = useSelector(
+    (state) => state.product
+  );
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getProductAsync());
